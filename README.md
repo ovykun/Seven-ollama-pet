@@ -22,8 +22,10 @@
   </a>
 </p>
 
----
+> **Seven fork:** This repository is being adapted into Seven, a personal macOS desktop companion powered by local Ollama. Seven's conversational persona is now separated from the selectable mascot art, so the voice can stay consistent while the visual companion is developed. This is an early fork: upstream features and branding are still present, and the Seven-specific character art/UI pass is not finished. The original project is MIT-licensed; see [LICENSE](LICENSE) and retain its attribution.
 
+---
+  
 ## ✨ Overview
 
 **Ollama Pet** is a native macOS application built with Swift, SwiftUI, and AppKit. It lives on your desktop as an interactive animated virtual companion powered by your local Ollama large language models. 
