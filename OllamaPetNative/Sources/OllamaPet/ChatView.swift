@@ -21,6 +21,7 @@ struct ChatView: View {
     @State private var messages: [ChatMessage] = []
     @State private var lastFailedPrompt: String? = nil
     @State private var errorMessage: String? = nil
+    @State private var panelDragStartOrigin: NSPoint? = nil
 
     // Weather input
     @State private var weatherCityInput: String = ""
@@ -105,6 +106,26 @@ struct ChatView: View {
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white)
                 }
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 5)
+                        .onChanged { value in
+                            if panelDragStartOrigin == nil {
+                                panelDragStartOrigin = PetWindowController.shared.petOrigin
+                            }
+                            guard let start = panelDragStartOrigin else { return }
+                            PetWindowController.shared.moveOpenPanel(
+                                from: start,
+                                translation: value.translation
+                            )
+                        }
+                        .onEnded { _ in
+                            panelDragStartOrigin = nil
+                            let origin = PetWindowController.shared.petOrigin
+                            dataManager.updatePosition(x: Double(origin.x), y: Double(origin.y))
+                        }
+                )
+                .help("Drag to move Seven's codec panel")
 
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -184,7 +205,7 @@ struct ChatView: View {
                         .font(.system(size: 14))
                 }
                 .buttonStyle(.plain)
-                .help("Close Panel")
+                .help("Close codec panel and return to companion")
             }
             .padding(.horizontal, 14)
             .padding(.top, 10)
