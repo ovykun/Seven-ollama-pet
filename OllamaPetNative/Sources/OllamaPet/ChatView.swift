@@ -22,6 +22,7 @@ struct ChatView: View {
     @State private var lastFailedPrompt: String? = nil
     @State private var errorMessage: String? = nil
     @State private var panelDragStartOrigin: NSPoint? = nil
+    @State private var speakNextBrief: Bool = false
 
     // Weather input
     @State private var weatherCityInput: String = ""
@@ -77,7 +78,7 @@ struct ChatView: View {
             ActionConfirmationView()
         }
         .animation(.easeInOut(duration: 0.18), value: petState.activeTab)
-        .frame(width: 360, height: 466)
+        .frame(width: 560, height: 700)
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color(red: 15/255, green: 17/255, blue: 26/255).opacity(0.96))
@@ -401,6 +402,8 @@ struct ChatView: View {
     // MARK: - Chat Tab
     private var chatTabContent: some View {
         VStack(spacing: 0) {
+            codecActionHeader
+
             // Message List
             ScrollViewReader { proxy in
                 ScrollView {
@@ -641,6 +644,77 @@ struct ChatView: View {
             .padding(.vertical, 7)
             .background(Color.black.opacity(0.25))
         }
+    }
+
+    private var codecActionHeader: some View {
+        HStack(spacing: 12) {
+            CodecPortraitView(name: codecPortraitName)
+                .frame(width: 82, height: 102)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.purple.opacity(0.45), lineWidth: 1))
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Circle().fill(ollamaClient.isOnline ? Color.green : Color.orange).frame(width: 6, height: 6)
+                    Text("SEVEN · CODEC LINK")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .tracking(1.1)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                Text("Your companion, on channel.")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+
+                HStack(spacing: 7) {
+                    Button {
+                        speakNextBrief = true
+                        inputText = "What's happening today?"
+                        sendMessage()
+                    } label: {
+                        Label("Read Brief", systemImage: "sun.max.fill")
+                            .font(.system(size: 10, weight: .semibold))
+                            .padding(.horizontal, 9).padding(.vertical, 6)
+                            .background(Color.purple.opacity(0.42), in: RoundedRectangle(cornerRadius: 5))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(petState.isThinking)
+
+                    Button {
+                        voiceAssistant.togglePushToTalk()
+                    } label: {
+                        Label(voiceAssistant.state == .listening ? "Stop" : "Talk", systemImage: voiceAssistant.state == .listening ? "waveform" : "mic.fill")
+                            .font(.system(size: 10, weight: .semibold))
+                            .padding(.horizontal, 9).padding(.vertical, 6)
+                            .background(Color.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 5))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        PetWindowController.shared.closePanel()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 10, weight: .bold))
+                            .padding(7)
+                            .background(Color.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 5))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Dismiss Codec panel")
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .background(Color.white.opacity(0.035))
+        .overlay(alignment: .bottom) { Rectangle().fill(Color.purple.opacity(0.28)).frame(height: 1) }
+    }
+
+    private var codecPortraitName: String {
+        if petState.isThinking { return "seven_thinking" }
+        if voiceAssistant.isSpeaking { return "seven_happy" }
+        if voiceAssistant.state == .listening { return "seven_concerned" }
+        if petState.activeTab == "game" { return "seven_deep_focus" }
+        if petState.activeTab == "weather" { return "seven_thinking" }
+        return "seven_ready"
     }
 
     private func suggestionPill(_ prompt: String) -> some View {
@@ -2058,11 +2132,13 @@ struct ChatView: View {
                     petState.moodPoints = min(100.0, petState.moodPoints + 15.0)
                     saveMessages()
 
-                    let speakEnabled = (dataManager.savedData.speakAiResponses ?? false) || (dataManager.savedData.dailyAwarenessSpeak ?? false)
+                    let speakEnabled = speakNextBrief || (dataManager.savedData.speakAiResponses ?? false) || (dataManager.savedData.dailyAwarenessSpeak ?? false)
                     if speakEnabled {
                         voiceAssistant.speak(text: fullReply)
                     }
+                    speakNextBrief = false
                 } catch {
+                    speakNextBrief = false
                     withAnimation(.easeInOut(duration: 0.2)) {
                         petState.isThinking = false
                     }

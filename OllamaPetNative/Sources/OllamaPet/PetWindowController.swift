@@ -366,8 +366,8 @@ public class PetWindowController: NSObject, NSWindowDelegate {
             return NSRect(x: origin.x, y: origin.y, width: petSize, height: petSize)
         }
 
-        let width: CGFloat = 360
-        let height: CGFloat = 620
+        let width: CGFloat = 560
+        let height: CGFloat = 700
 
         // Window origin is bottom-left corner of the window in screen coords
         // If currentAnchor.isLeft: pet is at left edge of window -> window.origin.x = petOrigin.x

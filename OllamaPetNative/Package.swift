@@ -17,7 +17,8 @@ let package = Package(
         .executableTarget(
             name: "OllamaPet",
             dependencies: [],
-            path: "Sources/OllamaPet"
+            path: "Sources/OllamaPet",
+            resources: [.copy("Resources/Codec")]
         )
     ]
 )
