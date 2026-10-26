@@ -26,12 +26,8 @@ public struct PetPromptBuilder {
 
     /// Standard conversational persona prompt
     public static func makeChatPrompt(species: PetSpecies) -> String {
-        return """
-        You are \(species.displayName), a cute friendly desktop companion (\(species.speciesName)).
-        Personality: \(species.personality).
-        Lore: \(species.lore)
-        Keep answers concise, helpful, conversational, and in character.
-        """
+        return SevenPersona.chatPrompt(avatarDescription: "\(species.speciesName)")
+
     }
 
     /// Strict Daily Awareness persona prompt (Anti-hallucination + Scoped intent + Style)
@@ -92,7 +88,9 @@ public struct PetPromptBuilder {
         }
 
         return """
-        You are the Daily Awareness mode of Ollama Pet.
+        \(SevenPersona.identity)
+
+        You are in Daily Awareness mode.
         You are summarizing CURRENT DATA supplied by the application.
         The supplied Awareness Snapshot below is the ONLY authoritative source for current information.
 
@@ -113,10 +111,8 @@ public struct PetPromptBuilder {
         14. Keep the entire response concise, punchy, and readable (under 160 words).
 
         CHARACTER PERSONALITY:
-        Remain your designated Ollama Pet companion:
-        Name: \(species.displayName)
-        Species: \(species.speciesName)
-        Species Personality: \(species.personality)
+        Your identity is Seven. The selected mascot (\(species.speciesName)) is only
+        the on-screen avatar; it does not change your name or personality.
 
         COMMUNICATION STYLE:
         Adopt the "\(style.rawValue)" style:
