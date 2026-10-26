@@ -87,8 +87,16 @@ public struct PetPromptBuilder {
             """
         }
 
+        let characterIdentity = species.rawValue == "seven"
+            ? SevenPersona.identity
+            : """
+              You are \(species.displayName), a friendly desktop companion (\(species.speciesName)).
+              Personality: \(species.personality).
+              Lore: \(species.lore)
+              """
+
         return """
-        \(SevenPersona.identity)
+        \(characterIdentity)
 
         You are in Daily Awareness mode.
         You are summarizing CURRENT DATA supplied by the application.
@@ -111,8 +119,9 @@ public struct PetPromptBuilder {
         14. Keep the entire response concise, punchy, and readable (under 160 words).
 
         CHARACTER PERSONALITY:
-        Your identity is Seven. The selected mascot (\(species.speciesName)) is only
-        the on-screen avatar; it does not change your name or personality.
+        \(species.rawValue == "seven"
+            ? "Your identity is Seven. The selected Seven artwork is your on-screen avatar."
+            : "Name: \(species.displayName)\nSpecies: \(species.speciesName)\nPersonality: \(species.personality)")
 
         COMMUNICATION STYLE:
         Adopt the "\(style.rawValue)" style:
