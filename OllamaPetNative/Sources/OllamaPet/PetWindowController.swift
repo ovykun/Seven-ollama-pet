@@ -340,6 +340,26 @@ public class PetWindowController: NSObject, NSWindowDelegate {
         }
     }
 
+    /// Moves the expanded panel from a drag that began in its header.
+    /// Translation uses SwiftUI screen coordinates, so vertical movement is inverted
+    /// when converted to AppKit's bottom-left screen coordinates.
+    public func moveOpenPanel(from start: NSPoint, translation: CGSize) {
+        guard PetState.shared.isChatOpen,
+              let screen = window?.screen ?? NSScreen.main else { return }
+
+        let visibleFrame = screen.visibleFrame
+        let petSize: CGFloat = 140
+        let target = NSPoint(
+            x: start.x + translation.width,
+            y: start.y - translation.height
+        )
+        let clamped = NSPoint(
+            x: max(visibleFrame.minX, min(visibleFrame.maxX - petSize, target.x)),
+            y: max(visibleFrame.minY, min(visibleFrame.maxY - petSize, target.y))
+        )
+        updatePetOriginFromDrag(clamped)
+    }
+
     private func calculateWindowFrame(forPetOrigin origin: NSPoint, open: Bool) -> NSRect {
         let petSize: CGFloat = 140
         if !open {
